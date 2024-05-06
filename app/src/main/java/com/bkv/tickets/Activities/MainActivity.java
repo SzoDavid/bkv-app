@@ -1,5 +1,6 @@
-package com.bkv.tickets;
+package com.bkv.tickets.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.bkv.tickets.R;
+import com.bkv.tickets.Services.PropertiesService;
 
 public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = MainActivity.class.getName();
@@ -37,5 +41,18 @@ public class MainActivity extends AppCompatActivity {
         String password = passwordET.getText().toString();
 
         Log.i(LOG_TAG, String.format("Bejelentkezett: %s ; %s", email, password));
+        redirectToHome();
+    }
+
+    public void signInOnClick(View view) {
+        Intent intent = new Intent(this, SignInActivity.class);
+        intent.putExtra("SECRET_KEY", PropertiesService.getSecretKey());
+        startActivity(intent);
+    }
+
+    private void redirectToHome() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("SECRET_KEY", PropertiesService.getSecretKey());
+        startActivity(intent);
     }
 }
