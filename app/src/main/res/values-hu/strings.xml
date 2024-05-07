@@ -8,4 +8,8 @@
     <string name="username">Felhasználónév</string>
     <string name="password_again">Jelszó mégegyszer</string>
     <string name="cancel">Mégse</string>
+    <string name="login_guest">Folytatás vendégként</string>
+    <string name="details">Részletek</string>
+    <string name="from">Honnan</string>
+    <string name="to">Hova</string>
 </resources>

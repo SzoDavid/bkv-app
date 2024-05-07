@@ -1,6 +1,7 @@
 package com.bkv.tickets.Activities;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,8 +11,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bkv.tickets.R;
 import com.bkv.tickets.Services.PropertiesService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class HomeActivity extends AppCompatActivity {
+    private static final String LOG_TAG = HomeActivity.class.getName();
+
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +30,11 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        String key = getIntent().getStringExtra("SECRET_KEY");
-        if (!PropertiesService.getSecretKey().equals(key)) {
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Success");
+        } else {
+            Log.d(LOG_TAG, "Not success");
             finish();
         }
     }
