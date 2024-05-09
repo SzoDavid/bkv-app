@@ -5,7 +5,6 @@
     <string name="e_mail">E-mail</string>
     <string name="password">Jelszó</string>
     <string name="sign_in">Regisztráció</string>
-    <string name="username">Felhasználónév</string>
     <string name="password_again">Jelszó mégegyszer</string>
     <string name="cancel">Mégse</string>
     <string name="login_guest">Folytatás vendégként</string>
@@ -16,4 +15,15 @@
     <string name="reservations">Foglalások</string>
     <string name="profile">Profil</string>
     <string name="logout">Kijelentkezés</string>
+    <string name="birth_date">Születés dátuma</string>
+    <string name="full_name">Teljes név</string>
+    <string name="error_passwords_dont_match">A jelszavak nem egyeznek</string>
+    <string name="error_field_empty">Minden mezőt ki kell tölteni</string>
+    <string name="error_invalid_email">Az e-mail cím invalid</string>
+    <string name="error_weak_password">A jelszó legyen legalább 8 karakter hosszú és tartalmazzon legalább egy kis- és nagy betűt, valamint számot</string>
+    <string name="error_email_used">Az e-mail cím foglalt</string>
+    <string name="error_unexpected">Váratlan hiba történt, próbáld újra később</string>
+    <string name="error_invalid_credentials">Helytelen e-mail vagy jelszó</string>
+    <string name="save">Mentés</string>
+    <string name="success_update_user">Felhasználó sikeresen frissítve</string>
 </resources>

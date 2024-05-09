@@ -3,12 +3,13 @@ package com.bkv.tickets.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -16,18 +17,21 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bkv.tickets.R;
 import com.bkv.tickets.Services.PropertiesService;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+
+import java.util.regex.Pattern;
 
 public class SignInActivity extends AppCompatActivity {
     private static final String LOG_TAG = SignInActivity.class.getName();
 
-    private EditText usernameET;
+    private EditText fullNameET;
     private EditText emailET;
     private EditText passwordET;
     private EditText passwordAgainET;
+    private TextView errorTV;
 
     private FirebaseAuth mAuth;
 
@@ -49,38 +53,80 @@ public class SignInActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        usernameET = findViewById(R.id.usernameEditText);
+        fullNameET = findViewById(R.id.fullNameEditText);
         emailET = findViewById(R.id.emailEditText);
         passwordET = findViewById(R.id.passwordEditText);
         passwordAgainET = findViewById(R.id.passwordAgainEditText);
+        errorTV = findViewById(R.id.errorTextView);
     }
 
     public void signInOnClick(View view) {
-        String username = usernameET.getText().toString();
+        errorTV.setText("");
+
+        String fullName = fullNameET.getText().toString();
         String email = emailET.getText().toString();
         String password = passwordET.getText().toString();
         String passwordAgain = passwordAgainET.getText().toString();
 
-        if (!password.equals(passwordAgain)) {
-            Log.e(LOG_TAG, "A ket jelszo nem egyezik");
+        if (fullName.isEmpty()) {
+            setError(fullNameET, R.string.error_field_empty, true);
             return;
         }
 
-        // TODO: validate
+        if (email.isEmpty()) {
+            setError(emailET, R.string.error_field_empty, true);
+            return;
+        }
 
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                Log.i(LOG_TAG, String.format("Regisztrált: %s ; %s ; %s ; %s", username, email, password, passwordAgain));
+        if (password.isEmpty()) {
+            setError(passwordET, R.string.error_field_empty, true);
+            return;
+        }
 
-                if (task.isSuccessful()) {
-                    Log.d(LOG_TAG, "User created successfully");
-                    redirectToHome();
-                    return;
-                }
+        if (passwordAgain.isEmpty()) {
+            setError(passwordAgainET, R.string.error_field_empty, true);
+            return;
+        }
 
-                Log.d(LOG_TAG, "User creation error");
-                Toast.makeText(SignInActivity.this, "User creation error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            setError(emailET, R.string.error_invalid_email, false);
+            return;
+        }
+
+        Pattern passwordPattern = Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{8,}$");
+        if (!passwordPattern.matcher(password).matches()) {
+            passwordAgainET.setText("");
+            setError(passwordET, R.string.error_weak_password, true);
+            return;
+        }
+
+        if (!password.equals(passwordAgain)) {
+            passwordAgainET.setText("");
+            setError(passwordET, R.string.error_passwords_dont_match, true);
+            return;
+        }
+
+        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
+            Log.i(LOG_TAG, String.format("Registration: %s ; %s", fullName, email));
+
+            if (task.isSuccessful()) {
+                Log.d(LOG_TAG, "User created successfully");
+                redirectToHome();
+                return;
+            }
+
+            try {
+                throw task.getException();
+            } catch (FirebaseAuthWeakPasswordException e) {
+                passwordAgainET.setText("");
+                setError(passwordET, R.string.error_weak_password, true);
+            } catch (FirebaseAuthInvalidCredentialsException e) {
+                setError(emailET, R.string.error_invalid_email, false);
+            } catch (FirebaseAuthUserCollisionException e) {
+                setError(emailET, R.string.error_email_used, false);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                Toast.makeText(SignInActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -92,5 +138,13 @@ public class SignInActivity extends AppCompatActivity {
     private void redirectToHome() {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+    }
+
+    private void setError(EditText editText, int errorCode, boolean clearText) {
+        if (clearText) {
+            editText.setText("");
+        }
+        editText.requestFocus();
+        errorTV.setText(errorCode);
     }
 }

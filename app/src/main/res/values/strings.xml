@@ -4,7 +4,6 @@
     <string name="e_mail">E-mail</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign in</string>
-    <string name="username">Username</string>
     <string name="password_again">Password again</string>
     <string name="cancel">Cancel</string>
     <string name="login_guest">Continue as guest</string>
@@ -15,4 +14,15 @@
     <string name="reservations">Reservations</string>
     <string name="profile">Profile</string>
     <string name="logout">Log out</string>
+    <string name="birth_date">Birth date</string>
+    <string name="full_name">Full name</string>
+    <string name="error_passwords_dont_match">Passwords don\'t match</string>
+    <string name="error_field_empty">All fields must be filled</string>
+    <string name="error_invalid_email">E-mail address is invalid</string>
+    <string name="error_weak_password">Password must be at least 8 characters long and contain at least one lower- and uppercase letter and at least one number</string>
+    <string name="error_email_used">User exists with the given e-mail address</string>
+    <string name="error_unexpected">Something unexpected happened, try again later</string>
+    <string name="error_invalid_credentials">Invalid e-mail or password</string>
+    <string name="save">Save</string>
+    <string name="success_update_user">User updated successfully</string>
 </resources>

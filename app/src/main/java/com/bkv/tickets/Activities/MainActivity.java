@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -16,16 +16,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bkv.tickets.R;
 import com.bkv.tickets.Services.PropertiesService;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 
 public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = MainActivity.class.getName();
 
     private EditText emailET;
     private EditText passwordET;
+    private TextView errorTV;
 
     private FirebaseAuth mAuth;
 
@@ -49,25 +48,33 @@ public class MainActivity extends AppCompatActivity {
 
         emailET = findViewById(R.id.emailEditText);
         passwordET = findViewById(R.id.passwordEditText);
+        errorTV = findViewById(R.id.errorTextView);
     }
 
     public void loginOnClick(View view) {
+        errorTV.setText("");
+
         String email = emailET.getText().toString();
         String password = passwordET.getText().toString();
 
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                Log.i(LOG_TAG, String.format("Bejelentkezett: %s ; %s", email, password));
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
+            Log.d(LOG_TAG, String.format("Logging in: %s ; %s", email, password));
 
-                if (task.isSuccessful()) {
-                    Log.d(LOG_TAG, "User logged in successfully");
-                    redirectToHome();
-                    return;
-                }
+            if (task.isSuccessful()) {
+                Log.d(LOG_TAG, "User logged in successfully");
+                redirectToHome();
+                return;
+            }
 
-                Log.d(LOG_TAG, "User auth error");
-                Toast.makeText(MainActivity.this, "User auth error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            try {
+                throw task.getException();
+            } catch (FirebaseAuthInvalidCredentialsException e) {
+                passwordET.setText("");
+                passwordET.requestFocus();
+                errorTV.setText(R.string.error_invalid_credentials);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                Toast.makeText(MainActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
             }
         });
     }

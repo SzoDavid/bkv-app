@@ -11,11 +11,13 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 public class FirestoreUserService implements IUserService {
     private static final String LOG_TAG = FirestoreUserService.class.getName();
     private static final String USERS_COLLECTION_PATH = "users";
+    private static final String AUTH_ID_FIELD = "authId";
     private final FirebaseFirestore db;
 
     public FirestoreUserService(FirebaseFirestore db) {
@@ -62,11 +64,56 @@ public class FirestoreUserService implements IUserService {
 
                     User user = userDocument.toObject(User.class);
 
-                    if (user == null) {
+                    if (user == null || !userDocument.contains(AUTH_ID_FIELD)) {
                         IllegalStateException exception = new IllegalStateException("Failed to parse User object");
                         Log.e(LOG_TAG, exception.toString());
                         onCompleteListener.onComplete(Tasks.forException(exception));
                     }
+
+                    user.setId(userDocument.getId())
+                        .setAuthid(userDocument.getString(AUTH_ID_FIELD));
+
+                    onCompleteListener.onComplete(Tasks.forResult(user));
+                });
+    }
+
+    @Override
+    public void getByAuthId(@NonNull String authId, @NonNull OnCompleteListener<User> onCompleteListener) {
+        db.collection(USERS_COLLECTION_PATH)
+                .whereEqualTo(AUTH_ID_FIELD, authId)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Exception exception = task.getException();
+                        if (exception == null) {
+                            exception = new Exception("Failed to get user");
+                        }
+
+                        Log.e(LOG_TAG, exception.toString());
+                        onCompleteListener.onComplete(Tasks.forException(exception));
+                        return;
+                    }
+
+                    QuerySnapshot userQuery = task.getResult();
+
+                    if (userQuery == null || userQuery.isEmpty()) {
+                        onCompleteListener.onComplete(Tasks.forResult(null));
+                    }
+
+                    DocumentSnapshot userDocument = userQuery.getDocuments().get(0);
+
+                    User user = userDocument.toObject(User.class);
+
+                    if (user == null || !userDocument.contains(AUTH_ID_FIELD)) {
+                        IllegalStateException exception = new IllegalStateException("Failed to parse User object");
+                        Log.e(LOG_TAG, exception.toString());
+                        onCompleteListener.onComplete(Tasks.forException(exception));
+                    }
+
+                    user.setId(userDocument.getId())
+                            .setAuthid(userDocument.getString(AUTH_ID_FIELD));
+
 
                     onCompleteListener.onComplete(Tasks.forResult(user));
                 });
