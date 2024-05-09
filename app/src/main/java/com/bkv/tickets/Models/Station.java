@@ -38,4 +38,14 @@ public class Station {
                 ", name='" + name + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Station station = (Station) o;
+
+        return id.equals(station.id);
+    }
 }

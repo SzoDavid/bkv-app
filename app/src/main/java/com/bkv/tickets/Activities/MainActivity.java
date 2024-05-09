@@ -40,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            redirectToHome();
+            finish();
+        }
+
         mAuth = FirebaseAuth.getInstance();
 
         emailET = findViewById(R.id.emailEditText);
@@ -57,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (task.isSuccessful()) {
                     Log.d(LOG_TAG, "User logged in successfully");
-                    redirectToReservations();
+                    redirectToHome();
                     return;
                 }
 
@@ -73,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void redirectToReservations() {
-        Intent intent = new Intent(this, ReservationsActivity.class);
+    private void redirectToHome() {
+        Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }
 

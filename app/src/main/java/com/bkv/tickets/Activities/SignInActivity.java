@@ -75,7 +75,7 @@ public class SignInActivity extends AppCompatActivity {
 
                 if (task.isSuccessful()) {
                     Log.d(LOG_TAG, "User created successfully");
-                    redirectToReservations();
+                    redirectToHome();
                     return;
                 }
 
@@ -89,9 +89,8 @@ public class SignInActivity extends AppCompatActivity {
         finish();
     }
 
-    private void redirectToReservations() {
-        Intent intent = new Intent(this, ReservationsActivity.class);
-        intent.putExtra("SECRET_KEY", PropertiesService.getSecretKey());
+    private void redirectToHome() {
+        Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }
 }

@@ -3,16 +3,15 @@ package com.bkv.tickets.Models;
 import androidx.annotation.NonNull;
 
 import java.util.List;
+import java.util.Map;
 
 public class RailLine {
     private String id;
-    private List<Station> stations;
-    private List<TravelTime> travelTimes;
+    private List<Stop> stations;
 
-    public RailLine(String id, List<Station> stations, List<TravelTime> travelTimes) {
+    public RailLine(String id, List<Stop> stations) {
         this.id = id;
         this.stations = stations;
-        this.travelTimes = travelTimes;
     }
 
     public RailLine() {
@@ -26,20 +25,12 @@ public class RailLine {
         this.id = id;
     }
 
-    public List<Station> getStations() {
+    public List<Stop> getStations() {
         return stations;
     }
 
-    public void setStations(List<Station> stations) {
+    public void setStations(List<Stop> stations) {
         this.stations = stations;
-    }
-
-    public List<TravelTime> getTravelTimes() {
-        return travelTimes;
-    }
-
-    public void setTravelTimes(List<TravelTime> travelTimes) {
-        this.travelTimes = travelTimes;
     }
 
     @NonNull
@@ -48,7 +39,6 @@ public class RailLine {
         return "RailLine{" +
                 "railLineId='" + id + '\'' +
                 ", stations=" + stations +
-                ", travelTimes=" + travelTimes +
                 '}';
     }
 }

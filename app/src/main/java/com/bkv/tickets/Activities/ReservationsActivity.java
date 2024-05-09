@@ -12,12 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bkv.tickets.Adapters.ReservationItemAdapter;
-import com.bkv.tickets.Models.RailLine;
 import com.bkv.tickets.Models.Reservation;
-import com.bkv.tickets.Models.Station;
-import com.bkv.tickets.Models.Train;
-import com.bkv.tickets.Models.TravelTime;
-import com.bkv.tickets.Models.User;
 import com.bkv.tickets.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,9 +20,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class ReservationsActivity extends AppCompatActivity {
     private static final String LOG_TAG = ReservationsActivity.class.getName();

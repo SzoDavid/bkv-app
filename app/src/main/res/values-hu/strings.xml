@@ -12,4 +12,8 @@
     <string name="details">Részletek</string>
     <string name="from">Honnan</string>
     <string name="to">Hova</string>
+    <string name="search">Keresés</string>
+    <string name="reservations">Foglalások</string>
+    <string name="profile">Profil</string>
+    <string name="logout">Kijelentkezés</string>
 </resources>
