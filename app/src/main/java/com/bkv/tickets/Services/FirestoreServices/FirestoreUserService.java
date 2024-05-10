@@ -7,8 +7,8 @@ import androidx.annotation.NonNull;
 import com.bkv.tickets.Models.User;
 import com.bkv.tickets.Services.Interfaces.IUserService;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -25,10 +25,23 @@ public class FirestoreUserService implements IUserService {
     }
 
     @Override
-    public void create(@NonNull User user, @NonNull OnCompleteListener<DocumentReference> onCompleteListener) {
+    public void create(@NonNull User user, @NonNull OnCompleteListener<User> onCompleteListener) {
         db.collection(USERS_COLLECTION_PATH)
                 .add(user)
-                .addOnCompleteListener(onCompleteListener);
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Exception exception = task.getException();
+                        if (exception == null) {
+                            exception = new Exception("Failed to get user");
+                        }
+
+                        Log.e(LOG_TAG, exception.toString());
+                        onCompleteListener.onComplete(Tasks.forException(exception));
+                        return;
+                    }
+
+                    handleResponse(task.getResult().get(), onCompleteListener);
+                });
     }
 
     @Override
@@ -44,37 +57,7 @@ public class FirestoreUserService implements IUserService {
         db.collection(USERS_COLLECTION_PATH)
                 .document(userId)
                 .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Exception exception = task.getException();
-                        if (exception == null) {
-                            exception = new Exception("Failed to get user");
-                        }
-
-                        Log.e(LOG_TAG, exception.toString());
-                        onCompleteListener.onComplete(Tasks.forException(exception));
-                        return;
-                    }
-
-                    DocumentSnapshot userDocument = task.getResult();
-
-                    if (!userDocument.exists()) {
-                        onCompleteListener.onComplete(Tasks.forResult(null));
-                    }
-
-                    User user = userDocument.toObject(User.class);
-
-                    if (user == null || !userDocument.contains(AUTH_ID_FIELD)) {
-                        IllegalStateException exception = new IllegalStateException("Failed to parse User object");
-                        Log.e(LOG_TAG, exception.toString());
-                        onCompleteListener.onComplete(Tasks.forException(exception));
-                        return;
-                    }
-
-                    user.setId(userDocument.getId());
-
-                    onCompleteListener.onComplete(Tasks.forResult(user));
-                });
+                .addOnCompleteListener(task -> handleResponse(task, onCompleteListener));
     }
 
     @Override
@@ -116,5 +99,37 @@ public class FirestoreUserService implements IUserService {
 
                     onCompleteListener.onComplete(Tasks.forResult(user));
                 });
+    }
+
+    private void handleResponse(Task<DocumentSnapshot> task, OnCompleteListener<User> onCompleteListener) {
+        if (!task.isSuccessful()) {
+            Exception exception = task.getException();
+            if (exception == null) {
+                exception = new Exception("Failed to get user");
+            }
+
+            Log.e(LOG_TAG, exception.toString());
+            onCompleteListener.onComplete(Tasks.forException(exception));
+            return;
+        }
+
+        DocumentSnapshot userDocument = task.getResult();
+
+        if (!userDocument.exists()) {
+            onCompleteListener.onComplete(Tasks.forResult(null));
+        }
+
+        User user = userDocument.toObject(User.class);
+
+        if (user == null || !userDocument.contains(AUTH_ID_FIELD)) {
+            IllegalStateException exception = new IllegalStateException("Failed to parse User object");
+            Log.e(LOG_TAG, exception.toString());
+            onCompleteListener.onComplete(Tasks.forException(exception));
+            return;
+        }
+
+        user.setId(userDocument.getId());
+
+        onCompleteListener.onComplete(Tasks.forResult(user));
     }
 }

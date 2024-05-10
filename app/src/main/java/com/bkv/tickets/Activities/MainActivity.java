@@ -14,10 +14,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bkv.tickets.Models.User;
 import com.bkv.tickets.R;
+import com.bkv.tickets.Services.FirestoreServices.FirestoreUserService;
+import com.bkv.tickets.Services.Interfaces.IUserService;
 import com.bkv.tickets.Services.PropertiesService;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = MainActivity.class.getName();
@@ -27,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView errorTV;
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private IUserService userService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +46,11 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        db = FirebaseFirestore.getInstance();
+        userService = new FirestoreUserService(db);
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            redirectToHome();
-            finish();
+            userService.getByAuthId(FirebaseAuth.getInstance().getCurrentUser().getUid(), this::getByAuthIdCallback);
         }
 
         mAuth = FirebaseAuth.getInstance();
@@ -62,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
 
             if (task.isSuccessful()) {
                 Log.d(LOG_TAG, "User logged in successfully");
-                redirectToHome();
+
+                userService.getByAuthId(FirebaseAuth.getInstance().getCurrentUser().getUid(), this::getByAuthIdCallback);
                 return;
             }
 
@@ -79,16 +89,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void getByAuthIdCallback(Task<User> task) {
+        if (task.isSuccessful()) {
+            redirectToHome(task.getResult());
+            return;
+        }
+
+        Exception exception = task.getException();
+        if (exception == null || exception.getMessage() == null) {
+            exception = new Exception("Failed to query user");
+        }
+        Log.e(LOG_TAG, exception.getMessage());
+        Toast.makeText(MainActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
+    }
+
     public void signInOnClick(View view) {
         Intent intent = new Intent(this, SignInActivity.class);
         intent.putExtra("SECRET_KEY", PropertiesService.getSecretKey());
         startActivity(intent);
     }
 
-    private void redirectToHome() {
+    private void redirectToHome(User currentUser) {
         Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("USER_ID", currentUser.getId());
+        intent.putExtra("USER_AUTH_ID", currentUser.getAuthId());
+        intent.putExtra("USER_EMAIL", currentUser.getEmail());
+        intent.putExtra("USER_NAME", currentUser.getName());
         startActivity(intent);
     }
-
-
 }

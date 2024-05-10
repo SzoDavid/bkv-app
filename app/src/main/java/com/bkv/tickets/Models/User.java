@@ -23,7 +23,7 @@ public class User {
 
     @Exclude
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Exclude

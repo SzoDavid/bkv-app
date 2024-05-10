@@ -26,7 +26,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.regex.Pattern;
@@ -42,6 +41,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private IUserService userService;
+    private User currentUser;
     private FirebaseAuth mAuth;
 
     @Override
@@ -152,10 +152,10 @@ public class SignInActivity extends AppCompatActivity {
         finish();
     }
 
-    private void createUserCallback(Task<DocumentReference> task) {
+    private void createUserCallback(Task<User> task) {
         if (task.isSuccessful()) {
             Log.d(LOG_TAG, "User created successfully");
-            redirectToHome();
+            redirectToHome(task.getResult());
             return;
         }
 
@@ -169,8 +169,12 @@ public class SignInActivity extends AppCompatActivity {
         Toast.makeText(SignInActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
     }
 
-    private void redirectToHome() {
+    private void redirectToHome(User currentUser) {
         Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("USER_ID", currentUser.getId());
+        intent.putExtra("USER_AUTH_ID", currentUser.getAuthId());
+        intent.putExtra("USER_EMAIL", currentUser.getEmail());
+        intent.putExtra("USER_NAME", currentUser.getName());
         startActivity(intent);
     }
 

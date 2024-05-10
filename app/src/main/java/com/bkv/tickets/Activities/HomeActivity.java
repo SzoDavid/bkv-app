@@ -1,7 +1,9 @@
 package com.bkv.tickets.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,15 +13,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.bkv.tickets.Adapters.HomePagerAdapter;
+import com.bkv.tickets.Models.User;
 import com.bkv.tickets.R;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String LOG_TAG = HomeActivity.class.getName();
 
-    private FirebaseUser user;
+    private FirebaseUser firebaseUser;
+    private FirebaseFirestore db;
+    private User currentUser;
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
@@ -35,11 +41,29 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser == null) {
             Log.d(LOG_TAG, "User not logged in");
             finish();
         }
+
+        Intent intent = getIntent();
+        currentUser = new User(
+                intent.getStringExtra("USER_ID"),
+                intent.getStringExtra("USER_AUTH_ID"),
+                intent.getStringExtra("USER_EMAIL"),
+                intent.getStringExtra("USER_NAME")
+        );
+
+        if (currentUser.getId() == null || currentUser.getAuthId() == null
+                || currentUser.getEmail() == null || currentUser.getName() == null) {
+            Log.e(LOG_TAG, "Failed to get current user from intent");
+            Toast.makeText(HomeActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        db = FirebaseFirestore.getInstance();
 
         tabLayout = findViewById(R.id.tabBar);
         viewPager = findViewById(R.id.viewPager);
@@ -67,5 +91,17 @@ public class HomeActivity extends AppCompatActivity {
                 super.onPageSelected(position);
             }
         });
+    }
+
+    public FirebaseUser getFirebaseUser() {
+        return firebaseUser;
+    }
+
+    public FirebaseFirestore getDb() {
+        return db;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
     }
 }

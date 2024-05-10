@@ -15,22 +15,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bkv.tickets.Activities.HomeActivity;
 import com.bkv.tickets.Models.User;
 import com.bkv.tickets.R;
 import com.bkv.tickets.Services.FirestoreServices.FirestoreUserService;
 import com.bkv.tickets.Services.Interfaces.IUserService;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileFragment extends Fragment {
     private static final String LOG_TAG = ProfileFragment.class.getName();
 
-    private FirebaseUser user;
-    private FirebaseFirestore db;
     private IUserService userService;
-    private User currentUser;
+    private HomeActivity homeActivity;
+    private User mUser;
 
     private TextView emailTV;
     private EditText fullNameET;
@@ -62,29 +60,31 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
+        homeActivity = (HomeActivity) requireActivity();
+
+        if (homeActivity.getFirebaseUser() == null) {
             Log.d(LOG_TAG, "User not logged in");
-            getActivity().finish();
+            homeActivity.finish();
         }
 
-        db = FirebaseFirestore.getInstance();
-        userService = new FirestoreUserService(db);
+        mUser = homeActivity.getCurrentUser();
+
+        userService = new FirestoreUserService(homeActivity.getDb());
 
         emailTV = view.findViewById(R.id.emailTextView);
         fullNameET = view.findViewById(R.id.fullNameEditText);
         saveButton = view.findViewById(R.id.saveButton);
         logoutButton = view.findViewById(R.id.logOutButton);
 
-        userService.getByAuthId(user.getUid(), this::getByIdCallback);
+        userService.getByAuthId(homeActivity.getFirebaseUser().getUid(), this::getByIdCallback);
 
         saveButton.setOnClickListener(this::saveOnClick);
         logoutButton.setOnClickListener(this::logoutOnClick);
     }
 
     private void loadData() {
-        emailTV.setText(currentUser.getEmail());
-        fullNameET.setText(currentUser.getName());
+        emailTV.setText(mUser.getEmail());
+        fullNameET.setText(mUser.getName());
     }
 
     private void getByIdCallback(Task<User> task) {
@@ -96,25 +96,25 @@ public class ProfileFragment extends Fragment {
             Log.e(LOG_TAG, exception.getMessage());
             Toast.makeText(getActivity(), getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
         }
-        currentUser = task.getResult();
+        mUser = task.getResult();
         loadData();
     }
 
     private void saveOnClick(View view) {
-        if (currentUser == null) {
+        if (mUser == null) {
             Toast.makeText(getActivity(), getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
         }
 
         String fullName = fullNameET.getText().toString();
 
         if (fullName.isEmpty()) {
-            fullNameET.setText(currentUser.getName());
+            fullNameET.setText(mUser.getName());
             fullNameET.requestFocus();
             Toast.makeText(getActivity(), getString(R.string.error_field_empty), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        userService.update(currentUser.setName(fullName), task -> {
+        userService.update(mUser.setName(fullName), task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(getActivity(), getString(R.string.success_update_user), Toast.LENGTH_SHORT).show();
                 fullNameET.clearFocus();
@@ -127,6 +127,6 @@ public class ProfileFragment extends Fragment {
 
     private void logoutOnClick(View view) {
         FirebaseAuth.getInstance().signOut();
-        getActivity().finish();
+        homeActivity.finish();
     }
 }
