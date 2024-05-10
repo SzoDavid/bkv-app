@@ -15,12 +15,19 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bkv.tickets.Models.User;
 import com.bkv.tickets.R;
+import com.bkv.tickets.Services.FirestoreServices.FirestoreUserService;
+import com.bkv.tickets.Services.Interfaces.IUserService;
 import com.bkv.tickets.Services.PropertiesService;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.regex.Pattern;
 
@@ -33,6 +40,8 @@ public class SignInActivity extends AppCompatActivity {
     private EditText passwordAgainET;
     private TextView errorTV;
 
+    private FirebaseFirestore db;
+    private IUserService userService;
     private FirebaseAuth mAuth;
 
     @Override
@@ -51,6 +60,8 @@ public class SignInActivity extends AppCompatActivity {
             finish();
         }
 
+        db = FirebaseFirestore.getInstance();
+        userService = new FirestoreUserService(db);
         mAuth = FirebaseAuth.getInstance();
 
         fullNameET = findViewById(R.id.fullNameEditText);
@@ -110,8 +121,14 @@ public class SignInActivity extends AppCompatActivity {
             Log.i(LOG_TAG, String.format("Registration: %s ; %s", fullName, email));
 
             if (task.isSuccessful()) {
-                Log.d(LOG_TAG, "User created successfully");
-                redirectToHome();
+                FirebaseUser user = mAuth.getCurrentUser();
+
+                if (user == null) {
+                    Log.e(LOG_TAG, "current user is null");
+                    Toast.makeText(SignInActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
+                }
+
+                userService.create(new User().setName(fullName).setEmail(email).setAuthId(user.getUid()), this::createUserCallback);
                 return;
             }
 
@@ -133,6 +150,23 @@ public class SignInActivity extends AppCompatActivity {
 
     public void cancelOnClick(View view) {
         finish();
+    }
+
+    private void createUserCallback(Task<DocumentReference> task) {
+        if (task.isSuccessful()) {
+            Log.d(LOG_TAG, "User created successfully");
+            redirectToHome();
+            return;
+        }
+
+        mAuth.getCurrentUser().delete();
+
+        Exception exception = task.getException();
+        if (exception == null || exception.getMessage() == null) {
+            exception = new Exception("Failed to query user");
+        }
+        Log.e(LOG_TAG, exception.getMessage());
+        Toast.makeText(SignInActivity.this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
     }
 
     private void redirectToHome() {

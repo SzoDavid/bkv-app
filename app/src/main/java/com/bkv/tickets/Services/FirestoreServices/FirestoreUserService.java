@@ -68,10 +68,10 @@ public class FirestoreUserService implements IUserService {
                         IllegalStateException exception = new IllegalStateException("Failed to parse User object");
                         Log.e(LOG_TAG, exception.toString());
                         onCompleteListener.onComplete(Tasks.forException(exception));
+                        return;
                     }
 
-                    user.setId(userDocument.getId())
-                        .setAuthid(userDocument.getString(AUTH_ID_FIELD));
+                    user.setId(userDocument.getId());
 
                     onCompleteListener.onComplete(Tasks.forResult(user));
                 });
@@ -109,11 +109,10 @@ public class FirestoreUserService implements IUserService {
                         IllegalStateException exception = new IllegalStateException("Failed to parse User object");
                         Log.e(LOG_TAG, exception.toString());
                         onCompleteListener.onComplete(Tasks.forException(exception));
+                        return;
                     }
 
-                    user.setId(userDocument.getId())
-                            .setAuthid(userDocument.getString(AUTH_ID_FIELD));
-
+                    user.setId(userDocument.getId());
 
                     onCompleteListener.onComplete(Tasks.forResult(user));
                 });
