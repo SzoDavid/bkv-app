@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 
 public class Stop {
     private Station station;
-    private int durationMinutes;
+    private Long durationMinutes;
 
-    public Stop(Station station, int durationMinutes) {
+    public Stop(Station station, Long durationMinutes) {
         this.station = station;
         this.durationMinutes = durationMinutes;
     }
@@ -23,11 +23,11 @@ public class Stop {
         return this;
     }
 
-    public int getDurationMinutes() {
+    public Long getDurationMinutes() {
         return durationMinutes;
     }
 
-    public Stop setDurationMinutes(int durationMinutes) {
+    public Stop setDurationMinutes(Long durationMinutes) {
         this.durationMinutes = durationMinutes;
         return this;
     }

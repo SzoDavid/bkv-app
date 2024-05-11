@@ -26,4 +26,8 @@
     <string name="error_invalid_credentials">Helytelen e-mail vagy jelszó</string>
     <string name="save">Mentés</string>
     <string name="success_update_user">Felhasználó sikeresen frissítve</string>
+    <string name="train">Vonat:</string>
+    <string name="stops">Megállók</string>
+    <string name="back">Vissza</string>
+    <string name="delete">Törlés</string>
 </resources>

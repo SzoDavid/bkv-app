@@ -2,9 +2,12 @@ package com.bkv.tickets.Models;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 
 public class User {
+    @Exclude
+    private DocumentReference reference;
     @Exclude
     private String id;
     private String authId;
@@ -18,7 +21,22 @@ public class User {
         this.name = name;
     }
 
+    public User(DocumentReference reference) {
+        this.reference = reference;
+    }
+
     public User() {
+    }
+
+    @Exclude
+    public DocumentReference getReference() {
+        return reference;
+    }
+
+    @Exclude
+    public User setReference(DocumentReference reference) {
+        this.reference = reference;
+        return this;
     }
 
     @Exclude

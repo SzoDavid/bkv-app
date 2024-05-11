@@ -25,4 +25,8 @@
     <string name="error_invalid_credentials">Invalid e-mail or password</string>
     <string name="save">Save</string>
     <string name="success_update_user">User updated successfully</string>
+    <string name="train">Train:</string>
+    <string name="stops">Stops</string>
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
 </resources>

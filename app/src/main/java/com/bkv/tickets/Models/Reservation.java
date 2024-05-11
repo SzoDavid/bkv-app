@@ -24,40 +24,45 @@ public class Reservation {
         return id;
     }
 
-    public void setId(String id) {
+    public Reservation setId(String id) {
         this.id = id;
+        return this;
     }
 
     public Station getFrom() {
         return from;
     }
 
-    public void setFrom(Station from) {
+    public Reservation setFrom(Station from) {
         this.from = from;
+        return this;
     }
 
     public Station getTo() {
         return to;
     }
 
-    public void setTo(Station to) {
+    public Reservation setTo(Station to) {
         this.to = to;
+        return this;
     }
 
     public Train getTrain() {
         return train;
     }
 
-    public void setTrain(Train train) {
+    public Reservation setTrain(Train train) {
         this.train = train;
+        return this;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public Reservation setUser(User user) {
         this.user = user;
+        return this;
     }
 
     @NonNull

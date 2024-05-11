@@ -2,84 +2,85 @@ package com.bkv.tickets.Models;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentReference;
+
 import java.time.LocalDateTime;
 
 public class Train {
+    private DocumentReference reference;
     private String id;
-    private String Name;
-    private int totalSeats;
-    private int availableSeats;
+    private String name;
     private RailLine line;
     private boolean ascendingOrder;
     private LocalDateTime departure;
 
-    public Train(String id, String name, int totalSeats, int availableSeats, RailLine line, boolean ascendingOrder, LocalDateTime departure) {
+    public Train(String id, String name, RailLine line, boolean ascendingOrder, LocalDateTime departure) {
         this.id = id;
-        Name = name;
-        this.totalSeats = totalSeats;
-        this.availableSeats = availableSeats;
+        this.name = name;
         this.line = line;
         this.ascendingOrder = ascendingOrder;
         this.departure = departure;
     }
 
+    public Train(DocumentReference reference) {
+        this.reference = reference;
+    }
+
     public Train() {
+    }
+
+    public DocumentReference getReference() {
+        return reference;
+    }
+
+    public Train setReference(DocumentReference reference) {
+        this.reference = reference;
+        return this;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public Train setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
-        return Name;
+        return this.name;
     }
 
-    public void setName(String name) {
-        Name = name;
-    }
-
-    public int getTotalSeats() {
-        return totalSeats;
-    }
-
-    public void setTotalSeats(int totalSeats) {
-        this.totalSeats = totalSeats;
-    }
-
-    public int getAvailableSeats() {
-        return availableSeats;
-    }
-
-    public void setAvailableSeats(int availableSeats) {
-        this.availableSeats = availableSeats;
+    public Train setName(String name) {
+        this.name = name;
+        return this;
     }
 
     public RailLine getLine() {
         return line;
     }
 
-    public void setLine(RailLine line) {
+    public Train setLine(RailLine line) {
         this.line = line;
+        return this;
     }
 
     public boolean isAscendingOrder() {
         return ascendingOrder;
     }
 
-    public void setAscendingOrder(boolean ascendingOrder) {
+    public Train setAscendingOrder(boolean ascendingOrder) {
         this.ascendingOrder = ascendingOrder;
+        return this;
     }
 
     public LocalDateTime getDeparture() {
         return departure;
     }
 
-    public void setDeparture(LocalDateTime departure) {
+    public Train setDeparture(LocalDateTime departure) {
         this.departure = departure;
+        return this;
     }
 
     @NonNull
@@ -87,10 +88,8 @@ public class Train {
     public String toString() {
         return "Train{" +
                 "trainId='" + id + '\'' +
-                ", Name='" + Name + '\'' +
-                ", totalSeats=" + totalSeats +
-                ", availableSeats=" + availableSeats +
-                ", line=" + line.getId() +
+                ", name='" + name + '\'' +
+                ", line=" + line +
                 ", ascendingOrder=" + ascendingOrder +
                 ", departure=" + departure +
                 '}';

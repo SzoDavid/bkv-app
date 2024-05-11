@@ -1,24 +1,29 @@
 package com.bkv.tickets.Services.FirestoreServices;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
-import com.bkv.tickets.Exceptions.ServiceException;
 import com.bkv.tickets.Models.RailLine;
-import com.bkv.tickets.Models.Station;
-import com.bkv.tickets.Models.Stop;
-import com.bkv.tickets.Models.TimeTableElement;
 import com.bkv.tickets.Models.Train;
 import com.bkv.tickets.Services.Interfaces.ITrainService;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 public class FirestoreTrainService implements ITrainService {
+    private static final String LOG_TAG = FirestoreTrainService.class.getName();
     private final FirebaseFirestore db;
+
+    public static final String TRAINS_COLLECTION_PATH = "trains";
+    public static final String NAME_FIELD = "name";
+    public static final String ASCENDING_DIRECTION_FIELD = "ascendingDirection";
+    public static final String DEPART_TIME_FIELD = "departureTime";
+    public static final String LINE_FIELD = "line";
+
 
     public FirestoreTrainService(FirebaseFirestore db) {
         this.db = db;
@@ -26,51 +31,42 @@ public class FirestoreTrainService implements ITrainService {
 
     @Override
     public void getById(@NonNull String id, @NonNull OnCompleteListener<Void> onCompleteListener) {
-
+        //TODO
     }
 
     @Override
     public void getAllByRailLineAndDirection(@NonNull RailLine line, boolean ascendingDirection, @NonNull OnCompleteListener<Void> onCompleteListener) {
-
+        //TODO
     }
 
-    @Override
-    public List<TimeTableElement> calculateTimetable(@NonNull Train train, @NonNull Station start, @NonNull Station destination) {
-        List<Stop> stations = train.getLine().getStations();
-        List<TimeTableElement> timeTable = new ArrayList<>();
-
-        int startIndex = stations.indexOf(new Stop().setStation(start));
-        int destinationIndex = stations.indexOf(new Stop().setStation(destination));
-
-        if (startIndex < destinationIndex != train.isAscendingOrder()) {
-            throw new ServiceException();
+    public static Train parseTrain(DocumentSnapshot trainDocument) {
+        if (trainDocument == null || !trainDocument.exists()) {
+            return null;
         }
 
-        if (train.isAscendingOrder()) {
-            for (int i = startIndex; i < destinationIndex; i++) {
-                Stop stop = stations.get(i);
-                timeTable.add(new TimeTableElement(stop.getStation(), train.getDeparture().plusMinutes(stop.getDurationMinutes())));
-            }
+        Train train;
 
-            return timeTable;
+        try {
+            train = new Train()
+                    .setReference(trainDocument.getReference())
+                    .setId(trainDocument.getId())
+                    .setName(trainDocument.getString(NAME_FIELD))
+                    .setAscendingOrder(Boolean.TRUE.equals(trainDocument.getBoolean(ASCENDING_DIRECTION_FIELD)))
+                    .setDeparture(LocalDateTime.ofInstant(trainDocument.getTimestamp(DEPART_TIME_FIELD).toInstant(), TimeZone.getDefault().toZoneId()))
+                    .setLine(new RailLine(trainDocument.getDocumentReference(LINE_FIELD))
+                            .setId(trainDocument.getDocumentReference(LINE_FIELD).getId()));
+        } catch (NullPointerException e) {
+            Log.e(LOG_TAG, "Null pointer exception in parseTrain");
+            throw new IllegalStateException("Failed to parse train", e);
         }
 
-        int lastStopTime = stations.get(stations.size() - 1).getDurationMinutes();
-
-        for (int i = startIndex; i > destinationIndex; i--) {
-            Stop stop = stations.get(i);
-            timeTable.add(new TimeTableElement(stop.getStation(), train.getDeparture().plusMinutes(lastStopTime - stop.getDurationMinutes())));
+        if (train == null || train.getId() == null || train.getName() == null
+                || train.getDeparture() == null || train.getLine() == null
+                || train.getLine().getReference() == null || train.getLine().getId() == null) {
+            Log.e(LOG_TAG, "Parsing is not complete in parseTrain");
+            throw new IllegalStateException("Failed to parse train");
         }
 
-        return timeTable;
-    }
-
-    @Override
-    public List<TimeTableElement> calculateTimetable(@NonNull Train train) {
-        List<Stop> stations = train.getLine().getStations();
-        return calculateTimetable(
-                train,
-                stations.get(train.isAscendingOrder() ? 0 : stations.size() - 1).getStation(),
-                stations.get(train.isAscendingOrder() ? stations.size() - 1 : 0).getStation());
+        return train;
     }
 }

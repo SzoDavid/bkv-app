@@ -18,16 +18,18 @@ public class Station {
         return id;
     }
 
-    public void setId(String id) {
+    public Station setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Station setName(String name) {
         this.name = name;
+        return this;
     }
 
     @NonNull

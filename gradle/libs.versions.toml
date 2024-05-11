@@ -14,6 +14,7 @@ playServicesAuth = "21.1.1"
 recyclerview = "1.3.2"
 recyclerviewSelection = "1.2.0"
 recyclerviewSelectionVersion = "1.1.0"
+swiperefreshlayout = "1.1.0"
 
 [libraries]
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
@@ -34,6 +35,7 @@ multidex = { module = "com.android.support:multidex", version.ref = "multidex" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 recyclerview = { module = "andriodx.recyclerview:recyclerview" }
 recyclerview-selection = { module = "andriodx.recyclerview:recyclerview-selection" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

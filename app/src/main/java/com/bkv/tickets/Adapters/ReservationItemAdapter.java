@@ -1,7 +1,10 @@
 package com.bkv.tickets.Adapters;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Context;
-import android.util.Log;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +15,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bkv.tickets.Activities.ReservationActivity;
 import com.bkv.tickets.Models.Reservation;
 import com.bkv.tickets.R;
+import com.bkv.tickets.Services.PropertiesService;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class ReservationItemAdapter extends RecyclerView.Adapter<ReservationItemAdapter.ViewHolder>{
@@ -39,10 +45,10 @@ public class ReservationItemAdapter extends RecyclerView.Adapter<ReservationItem
         Reservation currentItem = mReservationItems.get(position);
         holder.bindTo(currentItem);
 
-        if (holder.getAdapterPosition() > lastPosition) {
+        if (holder.getBindingAdapterPosition() > lastPosition) {
             Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_in_row);
             holder.itemView.startAnimation(animation);
-            lastPosition = holder.getAdapterPosition();
+            lastPosition = holder.getBindingAdapterPosition();
         }
     }
 
@@ -52,32 +58,31 @@ public class ReservationItemAdapter extends RecyclerView.Adapter<ReservationItem
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView mFromTextView;
-        private TextView mToTextView;
-        private TextView mDateTextView;
+        private final String LOG_TAG = ViewHolder.class.getName();
+
+        private TextView mTrainTextView;
+        private TextView mFromToTextView;
         private TextView mTimeTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            mFromTextView = itemView.findViewById(R.id.fromTextView);
-            mToTextView = itemView.findViewById(R.id.toTextView);
-            mDateTextView = itemView.findViewById(R.id.dateTextView);
+            mTrainTextView = itemView.findViewById(R.id.trainTextView);
+            mFromToTextView = itemView.findViewById(R.id.fromToTextView);
             mTimeTextView = itemView.findViewById(R.id.timeTextView);
-
-            itemView.findViewById(R.id.reservationDetailsButton).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("Activity", "Details click");
-                }
-            });
         }
 
         public void bindTo(Reservation currentItem) {
-            mFromTextView.setText(currentItem.getFrom().getName());
-            mToTextView.setText(currentItem.getTo().getName());
-            mDateTextView.setText(currentItem.getTrain().getDeparture().toLocalDate().toString());
-            mTimeTextView.setText(currentItem.getTrain().getDeparture().toLocalTime().toString());
+            mTrainTextView.setText(currentItem.getTrain().getName());
+            mFromToTextView.setText(String.format("%s -> %s",currentItem.getFrom().getName(), currentItem.getTo().getName()));
+            mTimeTextView.setText(currentItem.getTrain().getDeparture().format(DateTimeFormatter.ofPattern("yyyy.MM.dd. HH:mm")));
+
+            itemView.findViewById(R.id.reservationDetailsButton).setOnClickListener(view -> {
+                Intent intent = new Intent(mContext, ReservationActivity.class);
+                intent.putExtra("SECRET_KEY", PropertiesService.getSecretKey());
+                intent.putExtra("RESERVATION_ID", currentItem.getId());
+                startActivity(mContext, intent, new Bundle());
+            });
         }
     }
 
