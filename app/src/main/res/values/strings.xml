@@ -14,7 +14,7 @@
     <string name="reservations">Reservations</string>
     <string name="profile">Profile</string>
     <string name="logout">Log out</string>
-    <string name="birth_date">Birth date</string>
+    <string name="travel_date">Date of traveling</string>
     <string name="full_name">Full name</string>
     <string name="error_passwords_dont_match">Passwords don\'t match</string>
     <string name="error_field_empty">All fields must be filled</string>
@@ -29,4 +29,5 @@
     <string name="stops">Stops</string>
     <string name="back">Back</string>
     <string name="delete">Delete</string>
+    <string name="bkv_full" translatable="false">Biztosan Késő Vasút Zrt.</string>
 </resources>

@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class FirestoreRailLineService implements IRailLineService {
 
     public static final String RAIL_LINE_COLLECTION_PATH = "railLines";
     public static final String STATIONS_FIELD = "stations";
+    public static final String STATION_REFS_FIELD = "stationRefs";
     public static final String DURATION_MINUTES_FIELD = "durationMinutes";
     public static final String STATION_FIELD = "station";
     public static final String STATION_NAME_FIELD = "stationName";
@@ -58,8 +60,28 @@ public class FirestoreRailLineService implements IRailLineService {
     }
 
     @Override
-    public void getAllByStartAndDestinationStations(@NonNull Station start, @NonNull Station destination, @NonNull OnCompleteListener<Void> onCompleteListener) {
-        //TODO
+    public void getAllByStartAndDestinationStations(@NonNull Station start, @NonNull Station destination, @NonNull OnCompleteListener<List<RailLine>> onCompleteListener) {
+        mDB.collection(RAIL_LINE_COLLECTION_PATH)
+                .whereArrayContains(STATION_REFS_FIELD, mDB.collection(FirestoreStationService.STATION_COLLECTION_PATH).document(start.getId()))
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    ArrayList<RailLine> railLines = new ArrayList<>();
+
+                    try {
+                        for (QueryDocumentSnapshot railLineDocument : queryDocumentSnapshots) {
+                            RailLine railLine = parseRailLine(railLineDocument);
+
+                            if (railLine.getStations().contains(new Stop().setStation(destination))) {
+                                railLines.add(railLine);
+                            }
+
+                        }
+                    } catch (IllegalStateException e) {
+                        onCompleteListener.onComplete(Tasks.forException(e));
+                    }
+
+                    onCompleteListener.onComplete(Tasks.forResult(railLines));
+                }).addOnFailureListener(e -> onCompleteListener.onComplete(Tasks.forException(e)));
     }
 
     public static RailLine parseRailLine(DocumentSnapshot railLineDocument) throws IllegalStateException {

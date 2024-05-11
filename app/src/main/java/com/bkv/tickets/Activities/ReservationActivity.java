@@ -18,13 +18,9 @@ import com.bkv.tickets.Adapters.StopItemAdapter;
 import com.bkv.tickets.Models.Reservation;
 import com.bkv.tickets.Models.TimeTableElement;
 import com.bkv.tickets.R;
-import com.bkv.tickets.Services.FirestoreServices.FirestoreRailLineService;
 import com.bkv.tickets.Services.FirestoreServices.FirestoreReservationService;
-import com.bkv.tickets.Services.FirestoreServices.FirestoreUserService;
-import com.bkv.tickets.Services.Interfaces.IRailLineService;
 import com.bkv.tickets.Services.Interfaces.IReservationService;
 import com.bkv.tickets.Services.Interfaces.ITrainService;
-import com.bkv.tickets.Services.Interfaces.IUserService;
 import com.bkv.tickets.Services.PropertiesService;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -37,8 +33,6 @@ public class ReservationActivity extends AppCompatActivity {
 
     private FirebaseFirestore mDB;
     private IReservationService mReservationService;
-    private IUserService mUserService;
-    private IRailLineService mRailLineService;
     private StopItemAdapter mAdapter;
 
     private ArrayList<TimeTableElement> mTimeTableElements;
@@ -67,9 +61,8 @@ public class ReservationActivity extends AppCompatActivity {
             finish();
         }
 
-        mReservationService = new FirestoreReservationService(FirebaseFirestore.getInstance());
-        mUserService = new FirestoreUserService(FirebaseFirestore.getInstance());
-        mRailLineService = new FirestoreRailLineService(FirebaseFirestore.getInstance());
+        mDB = FirebaseFirestore.getInstance();
+        mReservationService = new FirestoreReservationService(mDB);
 
         mFromToTV = findViewById(R.id.fromToTextView);
         mDepartTV = findViewById(R.id.departTextView);

@@ -69,7 +69,7 @@ public class ReservationItemAdapter extends RecyclerView.Adapter<ReservationItem
 
             mTrainTextView = itemView.findViewById(R.id.trainTextView);
             mFromToTextView = itemView.findViewById(R.id.fromToTextView);
-            mTimeTextView = itemView.findViewById(R.id.timeTextView);
+            mTimeTextView = itemView.findViewById(R.id.departTimeTextView);
         }
 
         public void bindTo(Reservation currentItem) {

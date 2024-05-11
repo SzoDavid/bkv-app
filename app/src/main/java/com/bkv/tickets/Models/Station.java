@@ -2,7 +2,10 @@ package com.bkv.tickets.Models;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.Exclude;
+
 public class Station {
+    @Exclude
     private String id;
     private String name;
 
@@ -14,10 +17,12 @@ public class Station {
     public Station() {
     }
 
+    @Exclude
     public String getId() {
         return id;
     }
 
+    @Exclude
     public Station setId(String id) {
         this.id = id;
         return this;
