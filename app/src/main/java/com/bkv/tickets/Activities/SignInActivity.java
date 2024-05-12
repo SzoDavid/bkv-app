@@ -158,7 +158,7 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-        mAuth.getCurrentUser().delete();
+        //mAuth.getCurrentUser().delete();
 
         Exception exception = task.getException();
         if (exception == null || exception.getMessage() == null) {
