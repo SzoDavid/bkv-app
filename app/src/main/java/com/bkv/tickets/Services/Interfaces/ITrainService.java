@@ -10,12 +10,12 @@ import com.bkv.tickets.Models.TimeTableElement;
 import com.bkv.tickets.Models.Train;
 import com.google.android.gms.tasks.OnCompleteListener;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public interface ITrainService {
-    void getById(@NonNull String id, @NonNull OnCompleteListener<Void> onCompleteListener);
-    void getAllByRailLineAndDirection(@NonNull RailLine line, boolean ascendingDirection, @NonNull OnCompleteListener<Void> onCompleteListener);
+    void getAllByRailLineDirectionAndDate(@NonNull RailLine line, boolean ascendingDirection, LocalDate date, @NonNull OnCompleteListener<List<Train>> onCompleteListener);
 
     static List<TimeTableElement> calculateTimetable(@NonNull Train train, @NonNull Station start, @NonNull Station destination) {
         List<Stop> stations = train.getLine().getStations();
@@ -39,7 +39,7 @@ public interface ITrainService {
 
         long lastStopTime = stations.get(stations.size() - 1).getDurationMinutes();
 
-        for (int i = startIndex; i > destinationIndex; i--) {
+        for (int i = startIndex; i >= destinationIndex; i--) {
             Stop stop = stations.get(i);
             timeTable.add(new TimeTableElement(stop.getStation(), train.getDeparture().plusMinutes(lastStopTime - stop.getDurationMinutes())));
         }

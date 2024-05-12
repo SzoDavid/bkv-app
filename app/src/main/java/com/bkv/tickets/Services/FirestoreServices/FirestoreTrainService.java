@@ -8,10 +8,18 @@ import com.bkv.tickets.Models.RailLine;
 import com.bkv.tickets.Models.Train;
 import com.bkv.tickets.Services.Interfaces.ITrainService;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 public class FirestoreTrainService implements ITrainService {
@@ -30,13 +38,32 @@ public class FirestoreTrainService implements ITrainService {
     }
 
     @Override
-    public void getById(@NonNull String id, @NonNull OnCompleteListener<Void> onCompleteListener) {
-        //TODO
-    }
+    public void getAllByRailLineDirectionAndDate(@NonNull RailLine line, boolean ascendingDirection, LocalDate date, @NonNull OnCompleteListener<List<Train>> onCompleteListener) {
+        LocalDateTime startDateTime = date.atStartOfDay();
+        LocalDateTime endDateTime = LocalTime.MAX.atDate(date);
+        Date startDate = Date.from(startDateTime.toInstant(ZoneOffset.systemDefault().getRules().getOffset(startDateTime)));
+        Date endDate = Date.from(endDateTime.toInstant(ZoneOffset.systemDefault().getRules().getOffset(endDateTime)));
 
-    @Override
-    public void getAllByRailLineAndDirection(@NonNull RailLine line, boolean ascendingDirection, @NonNull OnCompleteListener<Void> onCompleteListener) {
-        //TODO
+        db.collection(TRAINS_COLLECTION_PATH)
+                .whereGreaterThanOrEqualTo(DEPART_TIME_FIELD, startDate)
+                .whereLessThanOrEqualTo(DEPART_TIME_FIELD, endDate)
+                .whereEqualTo(ASCENDING_DIRECTION_FIELD, ascendingDirection)
+                .whereEqualTo(LINE_FIELD, db.collection(FirestoreRailLineService.RAIL_LINE_COLLECTION_PATH).document(line.getId()))
+                .orderBy(DEPART_TIME_FIELD)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    ArrayList<Train> trains = new ArrayList<>();
+
+                    try {
+                        for (QueryDocumentSnapshot trainDocument : queryDocumentSnapshots) {
+                            trains.add(parseTrain(trainDocument));
+                        }
+                    } catch (IllegalStateException e) {
+                        onCompleteListener.onComplete(Tasks.forException(e));
+                    }
+
+                    onCompleteListener.onComplete(Tasks.forResult(trains));
+                }).addOnFailureListener(e -> onCompleteListener.onComplete(Tasks.forException(e)));
     }
 
     public static Train parseTrain(DocumentSnapshot trainDocument) {

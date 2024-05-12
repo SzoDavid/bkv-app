@@ -30,4 +30,8 @@
     <string name="back">Back</string>
     <string name="delete">Delete</string>
     <string name="bkv_full" translatable="false">Biztosan Késő Vasút Zrt.</string>
+    <string name="change">Change</string>
+    <string name="error_stations_equal">The selected stations are the same</string>
+    <string name="success_save_reservation">Reservation saved successfully</string>
+    <string name="success_delete_reservation">Reservation deleted</string>
 </resources>

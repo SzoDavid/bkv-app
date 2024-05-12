@@ -30,4 +30,8 @@
     <string name="stops">Megállók</string>
     <string name="back">Vissza</string>
     <string name="delete">Törlés</string>
+    <string name="change">Változtat</string>
+    <string name="error_stations_equal">A kiválasztott megállók megegyeznek</string>
+    <string name="success_save_reservation">A foglalás sikeres volt</string>
+    <string name="success_delete_reservation">Foglalás törölve</string>
 </resources>

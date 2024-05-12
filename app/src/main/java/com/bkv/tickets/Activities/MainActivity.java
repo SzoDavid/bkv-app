@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         db = FirebaseFirestore.getInstance();
+
         userService = new FirestoreUserService(db);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {

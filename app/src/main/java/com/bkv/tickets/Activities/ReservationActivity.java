@@ -79,7 +79,6 @@ public class ReservationActivity extends AppCompatActivity {
     }
 
     public void initData(Task<Reservation> task) {
-        Log.d(LOG_TAG, "initData");
         if (!task.isSuccessful() || task.getResult() == null) {
             Exception exception = task.getException();
             if (exception == null || exception.getMessage() == null) {
@@ -109,6 +108,19 @@ public class ReservationActivity extends AppCompatActivity {
     }
 
     public void deleteOnClickListener(View view) {
-        //TODO
+        mReservationService.delete(mReservation.getId(), task -> {
+            if (!task.isSuccessful()) {
+                Exception exception = task.getException();
+                if (exception == null || exception.getMessage() == null) {
+                    exception = new Exception("Failed to query reservations");
+                }
+                Log.e(LOG_TAG, exception.getMessage());
+                Toast.makeText(this, getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, getString(R.string.success_delete_reservation), Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 }

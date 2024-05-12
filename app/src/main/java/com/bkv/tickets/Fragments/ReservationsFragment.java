@@ -111,4 +111,11 @@ public class ReservationsFragment extends Fragment {
             if (refresh) mSwipeRefreshLayout.setRefreshing(false);
         });
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSwipeRefreshLayout.setRefreshing(true);
+        loadData(true);
+    }
 }

@@ -3,19 +3,25 @@ package com.bkv.tickets.Services.FirestoreServices;
 import android.util.Log;
 
 import com.bkv.tickets.Models.Reservation;
+import com.bkv.tickets.Models.ReservationSaveObject;
 import com.bkv.tickets.Models.Station;
 import com.bkv.tickets.Models.Train;
 import com.bkv.tickets.Models.User;
 import com.bkv.tickets.Services.Interfaces.IReservationService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class FirestoreReservationService implements IReservationService {
@@ -38,8 +44,28 @@ public class FirestoreReservationService implements IReservationService {
     }
 
     @Override
-    public void create(Reservation reservation, OnCompleteListener<Void> onCompleteListener) {
+    public void create(Reservation reservation, OnCompleteListener<DocumentReference> onCompleteListener) {
+        ReservationSaveObject reservationSaveObject = new ReservationSaveObject();
+        LocalDateTime departure = reservation.getTrain().getDeparture();
+        reservationSaveObject.setDepartTime(new Timestamp(departure.toInstant(ZoneOffset.systemDefault().getRules().getOffset(departure))));
 
+        Map<String, Object> fromMap = new HashMap<>();
+        fromMap.put("station", db.collection(FirestoreStationService.STATION_COLLECTION_PATH).document(reservation.getFrom().getId()));
+        fromMap.put("stationName", reservation.getFrom().getName());
+        reservationSaveObject.setFrom(fromMap);
+
+        Map<String, Object> toMap = new HashMap<>();
+        toMap.put("station", db.collection(FirestoreStationService.STATION_COLLECTION_PATH).document(reservation.getTo().getId()));
+        toMap.put("stationName", reservation.getTo().getName());
+        reservationSaveObject.setTo(toMap);
+
+        reservationSaveObject.setTrain(reservation.getTrain().getReference());
+        reservationSaveObject.setTrainName(reservation.getTrain().getName());
+        reservationSaveObject.setUser(db.collection(FirestoreUserService.USERS_COLLECTION_PATH).document(reservation.getUser().getId()));
+
+        db.collection(RESERVATIONS_COLLECTION_PATH)
+                .add(reservationSaveObject)
+                .addOnCompleteListener(onCompleteListener);
     }
 
     @Override
